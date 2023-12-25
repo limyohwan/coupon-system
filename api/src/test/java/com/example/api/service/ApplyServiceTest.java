@@ -96,6 +96,9 @@ class ApplyServiceTest {
 
         countDownLatch.await();
 
+        // 쿠폰이 생성되는게 실시간이 아니여서 테스트케이스 실패하므로 강제적으로 Thread sleep을 줌
+        Thread.sleep(10000);
+
         long count = couponRepository.count();
 
         assertThat(count).isEqualTo(100);
