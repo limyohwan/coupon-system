@@ -77,4 +77,28 @@ class ApplyServiceTest {
         assertThat(count).isEqualTo(100);
     }
 
+    @Test
+    public void 레디스와카프카를사용한여러명응모() throws InterruptedException {
+        int threadCount = 1000;
+        ExecutorService executorService = Executors.newFixedThreadPool(32);
+        CountDownLatch countDownLatch = new CountDownLatch(threadCount);
+
+        for (int i = 0; i < threadCount; i++) {
+            long userId = i;
+            executorService.submit(() -> {
+                try {
+                    applyService.applyWithRedisAndKafka(userId);
+                } finally {
+                    countDownLatch.countDown();
+                }
+            });
+        }
+
+        countDownLatch.await();
+
+        long count = couponRepository.count();
+
+        assertThat(count).isEqualTo(100);
+    }
+
 }
