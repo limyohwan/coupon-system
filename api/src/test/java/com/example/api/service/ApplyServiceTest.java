@@ -104,4 +104,31 @@ class ApplyServiceTest {
         assertThat(count).isEqualTo(100);
     }
 
+    @Test
+    public void 한명당한개의쿠폰발급() throws InterruptedException {
+        int threadCount = 1000;
+        ExecutorService executorService = Executors.newFixedThreadPool(32);
+        CountDownLatch countDownLatch = new CountDownLatch(threadCount);
+
+        for (int i = 0; i < threadCount; i++) {
+            long userId = i;
+            executorService.submit(() -> {
+                try {
+                    applyService.applyWithRedisAndKafka2(1L);
+                } finally {
+                    countDownLatch.countDown();
+                }
+            });
+        }
+
+        countDownLatch.await();
+
+        // 쿠폰이 생성되는게 실시간이 아니여서 테스트케이스 실패하므로 강제적으로 Thread sleep을 줌
+        Thread.sleep(10000);
+
+        long count = couponRepository.count();
+
+        assertThat(count).isEqualTo(1);
+    }
+
 }
